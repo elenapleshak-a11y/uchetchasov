@@ -1,1 +1,347 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Трекер задач и оплаты</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PayTracker">
+<meta name="theme-color" content="#1976d2">
+
+<style>
+  :root{
+    --accent:#1976d2;
+    --bg:#f7f9fc;
+    --card:#fff;
+    --muted:#666;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{background:linear-gradient(180deg,var(--bg),#eaf2fb);padding:18px;box-sizing:border-box;}
+  .app{max-width:720px;margin:0 auto;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  h1{font-size:18px;margin:0}
+  .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(20,40,80,0.06);margin-bottom:12px}
+  .row{display:flex;gap:8px;align-items:center}
+  .grow{flex:1}
+  input,select,button{font-size:15px;padding:10px;border-radius:8px;border:1px solid #e3e7ee;outline:none}
+  .big{font-size:16px;padding:14px;border-radius:12px}
+  .quick{display:flex;gap:8px}
+  .tasks{max-height:280px;overflow:auto;margin-top:8px}
+  .task{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid #f0f3f7;margin-bottom:6px;background:#fff}
+  .muted{color:var(--muted);font-size:13px}
+  .pill{background:#eef6ff;padding:6px 8px;border-radius:999px;color:var(--accent);font-weight:600}
+  .summary{display:flex;gap:8px;flex-wrap:wrap}
+  .summary .card{flex:1;min-width:140px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .danger{background:#fff4f4;border:1px solid #ffd3d3}
+  .small{font-size:13px;padding:8px}
+  .center{display:flex;align-items:center;justify-content:center}
+  footer{margin-top:18px;text-align:center;color:#5f6b78;font-size:13px}
+  a.link{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Трекер задач — к оплате в один тап</h1>
+      <div class="muted">Добавляй задачу → укажи часы → готово</div>
+    </div>
+    <div style="margin-left:auto" class="pill" id="installHint">Установить</div>
+  </header>
+
+  <div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <label class="muted">Месяц</label>
+      <select id="monthSelect" class="grow"></select>
+    </div>
+
+    <div class="row" style="margin-bottom:8px">
+      <label class="muted">Ставка (₸ / час)</label>
+      <input id="hourRate" type="number" min="0" step="0.01" placeholder="Например 3000" />
+    </div>
+
+    <div class="quick">
+      <input id="taskName" class="grow big" type="text" placeholder="Короткое название задачи (одно слово OK)" />
+      <input id="taskHours" class="big" type="number" min="0" step="0.25" placeholder="часы" style="width:88px" />
+      <button id="addBtn" class="big" style="background:var(--accent);color:#fff;border:none">Добавить</button>
+    </div>
+
+    <div class="tasks" id="tasksList" aria-live="polite"></div>
+
+    <div style="margin-top:10px" class="row">
+      <div class="grow">
+        <label class="muted">Выплачено за месяц (₸)</label>
+        <input id="paidInput" type="number" min="0" step="0.01" placeholder="0" />
+      </div>
+      <button id="savePaid" class="small">Сохранить выплату</button>
+    </div>
+
+    <div style="margin-top:12px" class="summary">
+      <div class="card">
+        <div class="muted">Задач</div>
+        <div id="totalTasks" style="font-weight:700;font-size:20px">0</div>
+      </div>
+      <div class="card">
+        <div class="muted">Часов</div>
+        <div id="totalHours" style="font-weight:700;font-size:20px">0</div>
+      </div>
+      <div class="card">
+        <div class="muted">К выплате</div>
+        <div id="toPay" style="font-weight:700;font-size:20px">0 ₸</div>
+      </div>
+      <div class="card">
+        <div class="muted">Осталось unpaid</div>
+        <div id="unpaid" style="font-weight:700;font-size:20px">0 ₸</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="exportCSV" class="small">Экспорт CSV</button>
+      <button id="clearAll" class="small danger">Удалить все</button>
+    </div>
+  </div>
+
+  <footer>
+    Сделано честно — без фраз про «вдох». Нужны интеграции (Google/icloud/backup)? Скажи — и дам варианты.
+  </footer>
+</div>
+
+<script>
+/* ====== Data model in localStorage ====== */
+const LS_KEY = 'paytracker_v1';
+function loadStore(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || {tasks:[], rates:{}, paid:{}} } catch(e){ return {tasks:[], rates:{}, paid:{}} } }
+function saveStore(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+let store = loadStore();
+
+/* ====== Utilities ====== */
+function monthKeyFromDate(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function prettyMonth(k){
+  const [y,m] = k.split('-'); const dt = new Date(y,Number(m)-1);
+  return dt.toLocaleString('ru',{month:'long', year:'numeric'});
+}
+
+/* ====== UI elements ====== */
+const monthSelect = document.getElementById('monthSelect');
+const hourRateInput = document.getElementById('hourRate');
+const taskName = document.getElementById('taskName');
+const taskHours = document.getElementById('taskHours');
+const addBtn = document.getElementById('addBtn');
+const tasksList = document.getElementById('tasksList');
+const totalTasks = document.getElementById('totalTasks');
+const totalHours = document.getElementById('totalHours');
+const toPay = document.getElementById('toPay');
+const unpaid = document.getElementById('unpaid');
+const paidInput = document.getElementById('paidInput');
+const savePaid = document.getElementById('savePaid');
+const exportCSV = document.getElementById('exportCSV');
+const clearAllBtn = document.getElementById('clearAll');
+const installHint = document.getElementById('installHint');
+
+let currentMonth = monthKeyFromDate(new Date());
+
+/* ====== Init months selector (past 24 / next 6 months) ====== */
+(function initMonths(){
+  const options = [];
+  const today = new Date();
+  // from -24 months to +6 months
+  for(let i=-24;i<=6;i++){
+    const d = new Date(today.getFullYear(), today.getMonth()+i, 1);
+    const k = monthKeyFromDate(d);
+    options.push({k,label:prettyMonth(k)});
+  }
+  options.forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.k; opt.textContent = o.label;
+    if(o.k === currentMonth) opt.selected = true;
+    monthSelect.appendChild(opt);
+  });
+})();
+
+/* ====== Render / calculations ====== */
+function getRateForMonth(month){
+  return Number(store.rates[month] ?? 0);
+}
+function setRateForMonth(month, rate){
+  store.rates[month] = Number(rate);
+  saveStore(store);
+}
+function getPaidForMonth(month){
+  return Number(store.paid[month] ?? 0);
+}
+function setPaidForMonth(month, amount){
+  store.paid[month] = Number(amount);
+  saveStore(store);
+}
+function tasksForMonth(month){
+  return store.tasks.filter(t => t.month === month);
+}
+function calculateSummary(month){
+  const tasks = tasksForMonth(month);
+  const totalTasksCount = tasks.length;
+  const totalHoursCount = tasks.reduce((s,t)=>s+Number(t.hours),0);
+  const rate = getRateForMonth(month);
+  const totalAmount = Math.round(totalHoursCount * rate);
+  const paid = getPaidForMonth(month);
+  const unpaidAmount = totalAmount - paid;
+  return {totalTasksCount,totalHoursCount,rate,totalAmount,paid,unpaidAmount};
+}
+
+function render(){
+  const month = currentMonth;
+  // rate
+  hourRateInput.value = getRateForMonth(month) || '';
+  // paid
+  paidInput.value = getPaidForMonth(month) || '';
+  // tasks list
+  tasksList.innerHTML = '';
+  const tasks = tasksForMonth(month).slice().reverse();
+  if(tasks.length === 0){
+    tasksList.innerHTML = '<div class="muted center" style="padding:18px">Нет задач в этом месяце — добавь одну в два касания</div>';
+  } else {
+    tasks.forEach(t=>{
+      const el = document.createElement('div'); el.className='task';
+      el.innerHTML = `<div>
+        <div style="font-weight:600">${escapeHtml(t.name)}</div>
+        <div class="muted">${t.date} • ${t.notes||''}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700">${t.hours} ч</div>
+        <div class="muted" style="margin-top:6px">
+          <button class="small" data-id="${t.id}" onclick="editTask('${t.id}')">✏️</button>
+          <button class="small" data-id="${t.id}" onclick="deleteTask('${t.id}')">🗑️</button>
+        </div>
+      </div>`;
+      tasksList.appendChild(el);
+    });
+  }
+
+  const s = calculateSummary(month);
+  totalTasks.textContent = s.totalTasksCount;
+  totalHours.textContent = +s.totalHoursCount.toFixed(2);
+  toPay.textContent = numberWithSpaces(s.totalAmount) + ' ₸';
+  unpaid.textContent = numberWithSpaces(Math.max(0,s.unpaidAmount)) + ' ₸';
+}
+
+/* ====== Actions ====== */
+function addTask(){
+  const name = (taskName.value || '').trim();
+  const hours = parseFloat(taskHours.value || 0);
+  if(!name || !hours || hours <= 0){ 
+    flash('Напиши название и часы > 0'); 
+    return;
+  }
+  const id = 't' + Date.now();
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('ru');
+  store.tasks.push({id, name, hours:hours, date:dateStr, month:currentMonth, notes:''});
+  saveStore(store);
+  taskName.value=''; taskHours.value='';
+  render();
+}
+
+function deleteTask(id){
+  store.tasks = store.tasks.filter(t=>t.id !== id);
+  saveStore(store);
+  render();
+}
+
+window.deleteTask = deleteTask;
+
+function editTask(id){
+  const t = store.tasks.find(x=>x.id===id);
+  if(!t) return;
+  const newName = prompt('Название', t.name);
+  if(newName === null) return;
+  const newHours = prompt('Часы', t.hours);
+  if(newHours === null) return;
+  const nh = parseFloat(newHours);
+  if(isNaN(nh) || nh <= 0){ flash('Часы должны быть > 0'); return; }
+  t.name = newName.trim();
+  t.hours = nh;
+  saveStore(store);
+  render();
+}
+window.editTask = editTask;
+
+addBtn.addEventListener('click', addTask);
+taskHours.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addTask(); });
+taskName.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ taskHours.focus(); } });
+
+monthSelect.addEventListener('change', ()=>{
+  currentMonth = monthSelect.value;
+  render();
+});
+
+hourRateInput.addEventListener('blur', ()=>{
+  const v = Number(hourRateInput.value || 0);
+  setRateForMonth(currentMonth, v);
+  render();
+});
+
+savePaid.addEventListener('click', ()=>{
+  const v = Number(paidInput.value || 0);
+  setPaidForMonth(currentMonth, v);
+  render();
+});
+
+exportCSV.addEventListener('click', ()=>{
+  const rows = [['id','date','name','hours','month','rate','amount','paid_for_month']];
+  store.tasks.forEach(t=>{
+    const rate = getRateForMonth(t.month);
+    rows.push([t.id,t.date,t.name,t.hours,t.month,rate, (t.hours*rate), getPaidForMonth(t.month)]);
+  });
+  const csv = rows.map(r=>r.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download = `paytracker_${currentMonth}.csv`; a.click();
+  URL.revokeObjectURL(url);
+});
+
+clearAllBtn.addEventListener('click', ()=>{
+  if(confirm('Удалить все данные локально? Это нельзя отменить.')){ store = {tasks:[], rates:{}, paid:{}}; saveStore(store); render(); }
+});
+
+/* ====== helpers ====== */
+function numberWithSpaces(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+function flash(msg){ alert(msg); }
+function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ====== initial render ====== */
+render();
+
+/* ====== install PWA hint ====== */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installHint.style.display = 'inline-block';
+});
+installHint.addEventListener('click', async ()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installHint.style.display='none';
+  } else {
+    alert('Открой меню браузера → "Добавить на экран домой"');
+  }
+});
+
+/* ====== keyboard shortcut for fast add (for desktop testing) ====== */
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ taskName.focus(); }
+});
+
+/* ====== register service worker (for offline) ====== */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{/* ignore */});
+}
+
+</script>
+</body>
+</html>
 
