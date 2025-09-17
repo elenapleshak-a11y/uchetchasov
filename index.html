@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Учет задач">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#6c5ce7">
     <title>Учет задач и оплат</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -138,6 +143,15 @@
             </div>
         </div>
 
+        <!-- Кнопка установки PWA (показывается только если можно установить) -->
+<div class="row mb-2" id="installButtonContainer" style="display: none;">
+    <div class="col-12">
+        <button class="btn btn-outline-success w-100" id="installButton">
+            <i class="fas fa-download me-2"></i>Установить приложение
+        </button>
+    </div>
+</div>
+
         <!-- Таблица задач -->
 <div class="row">
     <div class="col-12">
@@ -252,6 +266,33 @@
     // Хранение данных
     let tasks = [];
     let payments = [];
+
+        // PWA Installation
+let deferredPrompt;
+const installButton = document.getElementById('installButton');
+const installButtonContainer = document.getElementById('installButtonContainer');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installButtonContainer.style.display = 'block';
+});
+
+installButton.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            installButtonContainer.style.display = 'none';
+        }
+        deferredPrompt = null;
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    installButtonContainer.style.display = 'none';
+    deferredPrompt = null;
+});
 
     // Инициализация приложения
     document.addEventListener('DOMContentLoaded', function() {
