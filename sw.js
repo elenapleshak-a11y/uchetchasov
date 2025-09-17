@@ -1,19 +1,28 @@
-const CACHE_NAME = 'paytracker-cache-v1';
-const TO_CACHE = ['/', '/index.html', '/manifest.json'];
+const CACHE_NAME = 'task-payments-v1';
+const urlsToCache = [
+  '/',
+  './index.html',
+  './manifest.json'
+];
 
-self.addEventListener('install', event=>{
+self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(TO_CACHE)).then(()=>self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-self.addEventListener('activate', event=>{
-  event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener('fetch', event=>{
+self.addEventListener('fetch', function(event) {
   event.respondWith(
-    caches.match(event.request).then(res => res || fetch(event.request).catch(()=>caches.match('/index.html')))
+    caches.match(event.request)
+      .then(function(response) {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
   );
 });
-
