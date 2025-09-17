@@ -1,21 +1,16 @@
 {
-  "name": "PayTracker",
-  "short_name": "PayTracker",
-  "start_url": "/index.html",
+  "name": "Учет задач и оплат",
+  "short_name": "TaskPayments",
+  "description": "Приложение для учета выполненных задач и полученных оплат",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f9fc",
-  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "theme_color": "#6c5ce7",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192.png?text=P",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cGF0aCBkPSJNOTYgMTQ0QzEyMi41MSAxNDQgMTQ0IDEyMi41MSAxNDQgOTZDMTQ0IDY5LjQ5IDEyMi41MSA0OCA5NiA0OEM2OS40OSA0OCA0OCA2OS40OSA0OCA5NkM0OCAxMjIuNTEgNjkuNDkgMTQ0IDk2IDE0NFoiIGZpbGw9IiM2YzVjZTciLz4KICAgIDxwYXRoIGQ9Ik05NiAxNTJDMTA3IDExMiAxNTIgOTYgMTUyIDk2QzE1MiA5NiAxMzYgMTQxIDk2IDE1MloiIGZpbGw9IiM2YzVjZTciLz4KPC9zdmc+",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://via.placeholder.com/512.png?text=P",
-      "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ]
 }
-
