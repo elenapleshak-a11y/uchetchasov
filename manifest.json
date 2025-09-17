@@ -6,11 +6,21 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6c5ce7",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cGF0aCBkPSJNOTYgMTQ0QzEyMi41MSAxNDQgMTQ0IDEyMi41MSAxNDQgOTZDMTQ0IDY5LjQ5IDEyMi41MSA0OCA5NiA0OEM2OS40OSA0OCA0OCA2OS40OSA0OCA5NkM0OCAxMjIuNTEgNjkuNDkgMTQ0IDk2IDE0NFoiIGZpbGw9IiM2YzVjZTciLz4KICAgIDxwYXRoIGQ9Ik05NiAxNTJDMTA3IDExMiAxNTIgOTYgMTUyIDk2QzE1MiA5NiAxMzYgMTQxIDk2IDE1MloiIGZpbGw9IiM2YzVjZTciLz4KPC9zdmc+",
+      "src": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/icons/list-check.svg",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/icons/list-check.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["productivity", "finance"],
+  "lang": "ru"
 }
