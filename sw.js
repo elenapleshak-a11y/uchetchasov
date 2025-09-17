@@ -1,5 +1,5 @@
-const CACHE_NAME = 'task-payments-v4';
-const APP_URL = 'https://elenapleshak-a11y.github.io/task-manager/';
+const CACHE_NAME = 'task-payments-final';
+const APP_URL = 'https://elenapleshak-a11y.github.io/uchetchasov/';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -8,21 +8,14 @@ self.addEventListener('install', function(event) {
         return cache.addAll([
           APP_URL,
           APP_URL + 'index.html',
-          APP_URL + 'manifest.json'
+          APP_URL + 'manifest.json',
+          APP_URL + 'sw.js'
         ]);
       })
   );
 });
 
 self.addEventListener('fetch', function(event) {
-  // Перенаправляем все запросы на правильный URL
-  if (event.request.url === 'https://elenapleshak-a11y.github.io/') {
-    event.respondWith(
-      Response.redirect(APP_URL, 301)
-    );
-    return;
-  }
-
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
