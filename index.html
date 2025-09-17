@@ -172,21 +172,22 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Задача</th>
-                                        <th>Часы</th>
-                                        <th>Ставка</th>
-                                        <th>Стоимость</th>
-                                        <th>Оплачено</th>
-                                        <th>Статус</th>
-                                        <th>Действия</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tasksTable">
-                                    <!-- Задачи будут здесь -->
-                                </tbody>
-                            </table>
+    <thead class="table-light">
+        <tr>
+            <th>Задача</th>
+            <th>Часы</th>
+            <th>Ставка</th>
+            <th>Стоимость</th>
+            <th>Срок (дней)</th> <!-- НОВЫЙ СТОЛБЕЦ -->
+            <th>Оплачено</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody id="tasksTable">
+        <!-- Задачи будут здесь -->
+    </tbody>
+</table>
                         </div>
                     </div>
                 </div>
@@ -343,39 +344,51 @@
 
         // Добавление задачи
         function addTask() {
-            const taskName = document.getElementById('taskName').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const hours = parseFloat(document.getElementById('hours').value);
-            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const taskName = document.getElementById('taskName').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
 
-            if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
-                alert('Пожалуйста, заполните все обязательные поля');
-                return;
-            }
+    if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
 
-            const task = {
-                id: Date.now(),
-                name: taskName,
-                startDate: startDate,
-                endDate: endDate,
-                hours: hours,
-                hourlyRate: hourlyRate,
-                cost: hours * hourlyRate,
-                paidAmount: 0
-            };
+    // РАСЧЕТ ДНЕЙ ВЫПОЛНЕНИЯ
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-            tasks.push(task);
-            saveData();
-            updateStats();
-            renderTasksTable();
-            populateMonthFilter();
-            updatePaymentTaskDropdown();
-            
-            // Закрытие модального окна и сброс формы
-            bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-            document.getElementById('taskForm').reset();
-        }
+    // ВАЛИДАЦИЯ ДАТ
+    if (end < start) {
+        alert('Дата выполнения не может быть раньше даты начала!');
+        return;
+    }
+
+    const daysToComplete = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    const task = {
+        id: Date.now(),
+        name: taskName,
+        startDate: startDate,
+        endDate: endDate,
+        daysToComplete: daysToComplete,
+        hours: hours,
+        hourlyRate: hourlyRate,
+        cost: hours * hourlyRate,
+        paidAmount: 0
+    };
+
+    tasks.push(task);
+    saveData();
+    updateStats();
+    renderTasksTable();
+    populateMonthFilter();
+    updatePaymentTaskDropdown();
+    
+    bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+    document.getElementById('taskForm').reset();
+}
 
         // Добавление оплаты
         function addPayment() {
@@ -516,37 +529,36 @@
                     const status = totalPaid >= task.cost ? 'Оплачено' : 'Не оплачено';
 
                     const row = document.createElement('tr');
-                    row.className = 'task-row';
-                    row.innerHTML = `
-                        <td>${task.name}</td>
-                        <td>${task.hours}</td>
-                        <td>${task.hourlyRate} ₽</td>
-                        <td>${task.cost.toFixed(2)} ₽</td>
-                        <td>${totalPaid.toFixed(2)} ₽</td>
-                        <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
+row.className = 'task-row';
+row.innerHTML = `
+    <td>${task.name}</td>
+    <td>${task.hours}</td>
+    <td>${task.hourlyRate} ₽</td>
+    <td>${task.cost.toFixed(2)} ₽</td>
+    <td>${task.daysToComplete} дн.</td> <!-- НОВЫЙ СТОЛБЕЦ -->
+    <td>${totalPaid.toFixed(2)} ₽</td>
+    <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
+    <td>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
+            <i class="fas fa-trash"></i>
+        </button>
+    </td>
+`;
                     table.appendChild(row);
 
                     // Детали оплат
-                    if (taskPayments.length > 0) {
-                        taskPayments.forEach(payment => {
-                            const paymentRow = document.createElement('tr');
-                            paymentRow.className = 'table-light';
-                            paymentRow.innerHTML = `
-                                <td colspan="5" class="small text-muted">Оплата: ${new Date(payment.date).toLocaleDateString()}</td>
-                                <td class="small text-muted">+${payment.amount.toFixed(2)} ₽</td>
-                                <td></td>
-                            `;
-                            table.appendChild(paymentRow);
-                        });
-                    }
-                });
-            });
+if (taskPayments.length > 0) {
+    taskPayments.forEach(payment => {
+        const paymentRow = document.createElement('tr');
+        paymentRow.className = 'table-light';
+        paymentRow.innerHTML = `
+            <td colspan="6" class="small text-muted">Оплата: ${new Date(payment.date).toLocaleDateString()}</td>
+            <td class="small text-muted">+${payment.amount.toFixed(2)} ₽</td>
+            <td></td>
+        `;
+        table.appendChild(paymentRow);
+    });
+}
 
             // Если задач нет, показываем сообщение
             if (tasks.length === 0) {
