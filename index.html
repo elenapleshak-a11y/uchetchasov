@@ -44,6 +44,35 @@
             padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
         }
+        .stats-card {
+    background-color: #f8f9fa;
+    border-left: 4px solid #6c5ce7;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.stats-card h6 {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.stats-card h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Для планшетов и десктопов */
+@media (min-width: 768px) {
+    .stats-card h6 {
+        font-size: 0.9rem;
+    }
+    .stats-card h4 {
+        font-size: 1.4rem;
+    }
+}
     </style>
 </head>
 <body class="bg-light">
@@ -54,6 +83,7 @@
         </header>
 
         <!-- Блок с общей информацией -->
+<!-- Блок с общей информацией -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card shadow-sm">
@@ -64,28 +94,28 @@
                 </select>
             </div>
             <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-3">
-                        <div class="stats-card p-3 rounded">
-                            <h6>Задач в работе</h6>
+                <div class="row row-cols-2 row-cols-md-4 g-2 text-center">
+                    <div class="col">
+                        <div class="stats-card p-2 p-md-3 rounded">
+                            <h6 class="mb-1">Задач</h6>
                             <h4 id="totalTasks" class="mb-0">0</h4>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="stats-card p-3 rounded">
-                            <h6>Часы</h6>
+                    <div class="col">
+                        <div class="stats-card p-2 p-md-3 rounded">
+                            <h6 class="mb-1">Часы</h6>
                             <h4 id="totalHours" class="mb-0">0</h4>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="stats-card p-3 rounded">
-                            <h6>Общая сумма</h6>
+                    <div class="col">
+                        <div class="stats-card p-2 p-md-3 rounded">
+                            <h6 class="mb-1">Сумма</h6>
                             <h4 id="totalAmount" class="mb-0">0 ₽</h4>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="stats-card p-3 rounded">
-                            <h6>Получено</h6>
+                    <div class="col">
+                        <div class="stats-card p-2 p-md-3 rounded">
+                            <h6 class="mb-1">Получено</h6>
                             <h4 id="totalPaid" class="mb-0">0 ₽</h4>
                         </div>
                     </div>
