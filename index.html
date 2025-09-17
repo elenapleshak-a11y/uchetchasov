@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script>
-    // Автоматический редирект на правильный URL
-    if (window.location.href === 'https://elenapleshak-a11y.github.io/') {
-        window.location.href = 'https://elenapleshak-a11y.github.io/task-manager/';
+   <script>
+    // Автоматический редирект если открыли не тот URL
+    const currentUrl = window.location.href;
+    const correctUrl = 'https://elenapleshak-a11y.github.io/uchetchasov/';
+    
+    if (currentUrl === 'https://elenapleshak-a11y.github.io/' || 
+        currentUrl === 'https://elenapleshak-a11y.github.io' ||
+        !currentUrl.includes('uchetchasov')) {
+        window.location.href = correctUrl;
     }
 </script>
     <meta charset="UTF-8">
