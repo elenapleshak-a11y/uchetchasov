@@ -1,380 +1,451 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Трекер задач и оплаты</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="PayTracker">
-<meta name="theme-color" content="#1976d2">
-
-<style>
-  :root{
-    --accent:#1976d2;
-    --bg:#f7f9fc;
-    --card:#fff;
-    --muted:#666;
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{background:linear-gradient(180deg,var(--bg),#eaf2fb);padding:18px;box-sizing:border-box;}
-  .app{max-width:720px;margin:0 auto;}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-  h1{font-size:18px;margin:0}
-  .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(20,40,80,0.06);margin-bottom:12px}
-  .row{display:flex;gap:8px;align-items:center}
-  .grow{flex:1}
-  input,select,button{font-size:15px;padding:10px;border-radius:8px;border:1px solid #e3e7ee;outline:none}
-  .big{font-size:16px;padding:14px;border-radius:12px}
-  .quick{display:flex;gap:8px}
-  .tasks{max-height:280px;overflow:auto;margin-top:8px}
-  .task{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid #f0f3f7;margin-bottom:6px;background:#fff}
-  .muted{color:var(--muted);font-size:13px}
-  .pill{background:#eef6ff;padding:6px 8px;border-radius:999px;color:var(--accent);font-weight:600}
-  .summary{display:flex;gap:8px;flex-wrap:wrap}
-  .summary .card{flex:1;min-width:140px}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .danger{background:#fff4f4;border:1px solid #ffd3d3}
-  .small{font-size:13px;padding:8px}
-  .center{display:flex;align-items:center;justify-content:center}
-  footer{margin-top:18px;text-align:center;color:#5f6b78;font-size:13px}
-  a.link{color:var(--accent);text-decoration:none}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет задач и оплат</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        .card-header {
+            background-color: #6c5ce7;
+            color: white;
+        }
+        .btn-primary {
+            background-color: #6c5ce7;
+            border-color: #6c5ce7;
+        }
+        .stats-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #6c5ce7;
+        }
+        .table-responsive {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .month-group {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .paid {
+            color: #28a745;
+        }
+        .unpaid {
+            color: #dc3545;
+        }
+        .task-row {
+            transition: background-color 0.3s;
+        }
+        .task-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
-<body>
-<div class="app">
-  <header>
-    <div>
-      <h1>Трекер задач — к оплате в один тап</h1>
-      <div class="muted">Добавляй задачу → укажи часы → готово</div>
-    </div>
-    <div style="margin-left:auto" class="pill" id="installHint">Установить</div>
-  </header>
+<body class="bg-light">
+    <div class="container py-4">
+        <header class="text-center mb-4">
+            <h1 class="display-5">Учет задач и оплат</h1>
+            <p class="lead">Отслеживайте выполнение задач и выплаты</p>
+        </header>
 
-  <div class="card">
-    <div class="row" style="margin-bottom:8px">
-      <label class="muted">Месяц</label>
-      <select id="monthSelect" class="grow"></select>
-    </div>
-
-    <div class="row" style="margin-bottom:8px">
-      <label class="muted">Ставка (₸ / час)</label>
-      <input id="hourRate" type="number" min="0" step="0.01" placeholder="Например 3000" />
-    </div>
-
-    <div class="quick">
-      <input id="taskName" class="grow big" type="text" placeholder="Короткое название задачи (одно слово OK)" />
-      <input id="taskHours" class="big" type="number" min="0" step="0.25" placeholder="часы" style="width:88px" />
-      <button id="addBtn" class="big" style="background:var(--accent);color:#fff;border:none">Добавить</button>
-    </div>
-
-    <div class="tasks" id="tasksList" aria-live="polite"></div>
-
-    <div style="margin-top:10px" class="row">
-      <div class="grow">
-        <label class="muted">Выплачено за месяц (₸)</label>
-        <input id="paidInput" type="number" min="0" step="0.01" placeholder="0" />
-      </div>
-      <button id="savePaid" class="small">Сохранить выплату</button>
-    </div>
-
-    <div style="margin-top:12px" class="summary">
-      <div class="card">
-        <div class="muted">Задач</div>
-        <div id="totalTasks" style="font-weight:700;font-size:20px">0</div>
-      </div>
-      <div class="card">
-        <div class="muted">Часов</div>
-        <div id="totalHours" style="font-weight:700;font-size:20px">0</div>
-      </div>
-      <div class="card">
-        <div class="muted">К выплате</div>
-        <div id="toPay" style="font-weight:700;font-size:20px">0 ₸</div>
-      </div>
-      <div class="card">
-        <div class="muted">Осталось unpaid</div>
-        <div id="unpaid" style="font-weight:700;font-size:20px">0 ₸</div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="exportCSV" class="small">Экспорт CSV</button>
-      <button id="clearAll" class="small danger">Удалить все</button>
-    </div>
-  </div>
-
-</div>
-
-<script>
-/* ====== Data model in localStorage ====== */
-const LS_KEY = 'paytracker_v1';
-function loadStore(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || {tasks:[], rates:{}, paid:{}} } catch(e){ return {tasks:[], rates:{}, paid:{}} } }
-function saveStore(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-  let bynRate = null;
-let lastRateDate = localStorage.getItem('bynRateDate');
-let savedRate = localStorage.getItem('bynRate');
-
-// если есть сохранённый курс и он на сегодня — берём из localStorage
-if (savedRate && lastRateDate === new Date().toISOString().slice(0,10)) {
-  bynRate = parseFloat(savedRate);
-} else {
-  fetchRates();
-}
-
-async function fetchRates() {
-  try {
-    const resp = await fetch('https://www.cbr-xml-daily.ru/daily_json.js');
-    const data = await resp.json();
-    const valute = data.Valute.BYN;
-    if (valute) {
-      // ЦБ даёт курс: сколько рублей за 1 BYN
-      // нам нужно наоборот → сколько BYN за 1 рубль
-      const rub_to_byn = 1 / valute.Value;
-      bynRate = rub_to_byn;
-      localStorage.setItem('bynRate', bynRate);
-      localStorage.setItem('bynRateDate', new Date().toISOString().slice(0,10));
-      render();
-    }
-  } catch (e) {
-    console.error('Ошибка загрузки курса BYN:', e);
-  }
-}
-
-function formatWithBYN(rubAmount) {
-  if (bynRate === null) return '';
-  const bynAmount = rubAmount * bynRate;
-  return ` (≈ BYN ${bynAmount.toFixed(2)})`;
-}
-
-
-let store = loadStore();
-
-/* ====== Utilities ====== */
-function monthKeyFromDate(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
-function prettyMonth(k){
-  const [y,m] = k.split('-'); const dt = new Date(y,Number(m)-1);
-  return dt.toLocaleString('ru',{month:'long', year:'numeric'});
-}
-
-/* ====== UI elements ====== */
-const monthSelect = document.getElementById('monthSelect');
-const hourRateInput = document.getElementById('hourRate');
-const taskName = document.getElementById('taskName');
-const taskHours = document.getElementById('taskHours');
-const addBtn = document.getElementById('addBtn');
-const tasksList = document.getElementById('tasksList');
-const totalTasks = document.getElementById('totalTasks');
-const totalHours = document.getElementById('totalHours');
-const toPay = document.getElementById('toPay');
-const unpaid = document.getElementById('unpaid');
-const paidInput = document.getElementById('paidInput');
-const savePaid = document.getElementById('savePaid');
-const exportCSV = document.getElementById('exportCSV');
-const clearAllBtn = document.getElementById('clearAll');
-const installHint = document.getElementById('installHint');
-
-let currentMonth = monthKeyFromDate(new Date());
-
-/* ====== Init months selector (past 24 / next 6 months) ====== */
-(function initMonths(){
-  const options = [];
-  const today = new Date();
-  // from -24 months to +6 months
-  for(let i=-24;i<=6;i++){
-    const d = new Date(today.getFullYear(), today.getMonth()+i, 1);
-    const k = monthKeyFromDate(d);
-    options.push({k,label:prettyMonth(k)});
-  }
-  options.forEach(o=>{
-    const opt = document.createElement('option');
-    opt.value = o.k; opt.textContent = o.label;
-    if(o.k === currentMonth) opt.selected = true;
-    monthSelect.appendChild(opt);
-  });
-})();
-
-/* ====== Render / calculations ====== */
-function getRateForMonth(month){
-  return Number(store.rates[month] ?? 0);
-}
-function setRateForMonth(month, rate){
-  store.rates[month] = Number(rate);
-  saveStore(store);
-}
-function getPaidForMonth(month){
-  return Number(store.paid[month] ?? 0);
-}
-function setPaidForMonth(month, amount){
-  store.paid[month] = Number(amount);
-  saveStore(store);
-}
-function tasksForMonth(month){
-  return store.tasks.filter(t => t.month === month);
-}
-function calculateSummary(month){
-  const tasks = tasksForMonth(month);
-  const totalTasksCount = tasks.length;
-  const totalHoursCount = tasks.reduce((s,t)=>s+Number(t.hours),0);
-  const rate = getRateForMonth(month);
-  const totalAmount = Math.round(totalHoursCount * rate);
-  const paid = getPaidForMonth(month);
-  const unpaidAmount = totalAmount - paid;
-  return {totalTasksCount,totalHoursCount,rate,totalAmount,paid,unpaidAmount};
-}
-
-function render(){
-  const month = currentMonth;
-  // rate
-  hourRateInput.value = getRateForMonth(month) || '';
-  // paid
-  paidInput.value = getPaidForMonth(month) || '';
-  // tasks list
-  tasksList.innerHTML = '';
-  const tasks = tasksForMonth(month).slice().reverse();
-  if(tasks.length === 0){
-    tasksList.innerHTML = '<div class="muted center" style="padding:18px">Нет задач в этом месяце — добавь одну в два касания</div>';
-  } else {
-    tasks.forEach(t=>{
-      const el = document.createElement('div'); el.className='task';
-      el.innerHTML = `<div>
-        <div style="font-weight:600">${escapeHtml(t.name)}</div>
-        <div class="muted">${t.date} • ${t.notes||''}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-weight:700">${t.hours} ч</div>
-        <div class="muted" style="margin-top:6px">
-          <button class="small" data-id="${t.id}" onclick="editTask('${t.id}')">✏️</button>
-          <button class="small" data-id="${t.id}" onclick="deleteTask('${t.id}')">🗑️</button>
+        <!-- Блок с общей информацией -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Общая статистика</span>
+                        <select id="monthFilter" class="form-select form-select-sm" style="width: auto;">
+                            <option value="all">Все месяцы</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="stats-card p-3 rounded">
+                                    <h6>Задач в работе</h6>
+                                    <h4 id="totalTasks" class="mb-0">0</h4>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stats-card p-3 rounded">
+                                    <h6>Общая сумма</h6>
+                                    <h4 id="totalAmount" class="mb-0">0 ₽</h4>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stats-card p-3 rounded">
+                                    <h6>Получено</h6>
+                                    <h4 id="totalPaid" class="mb-0">0 ₽</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>`;
-      tasksList.appendChild(el);
-    });
-  }
 
-  const s = calculateSummary(month);
-  totalTasks.textContent = s.totalTasksCount;
-  totalHours.textContent = +s.totalHoursCount.toFixed(2);
-  toPay.textContent = numberWithSpaces(s.totalAmount) + ' ₸';
-  unpaid.textContent = numberWithSpaces(Math.max(0,s.unpaidAmount)) + ' ₸';
-}
+        <!-- Кнопки управления -->
+        <div class="row mb-4">
+            <div class="col-6">
+                <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#taskModal">
+                    <i class="fas fa-plus me-2"></i>Добавить задачу
+                </button>
+            </div>
+            <div class="col-6">
+                <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                    <i class="fas fa-ruble-sign me-2"></i>Учесть оплату
+                </button>
+            </div>
+        </div>
 
-/* ====== Actions ====== */
-function addTask(){
-  const name = (taskName.value || '').trim();
-  const hours = parseFloat(taskHours.value || 0);
-  if(!name || !hours || hours <= 0){ 
-    flash('Напиши название и часы > 0'); 
-    return;
-  }
-  const id = 't' + Date.now();
-  const d = new Date();
-  const dateStr = d.toLocaleDateString('ru');
-  store.tasks.push({id, name, hours:hours, date:dateStr, month:currentMonth, notes:''});
-  saveStore(store);
-  taskName.value=''; taskHours.value='';
-  render();
-}
+        <!-- Таблица задач -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <span>Список задач и оплат</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Задача</th>
+                                        <th>Часы</th>
+                                        <th>Ставка</th>
+                                        <th>Стоимость</th>
+                                        <th>Оплачено</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasksTable">
+                                    <!-- Задачи будут здесь -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-function deleteTask(id){
-  store.tasks = store.tasks.filter(t=>t.id !== id);
-  saveStore(store);
-  render();
-}
+    <!-- Модальное окно добавления задачи -->
+    <div class="modal fade" id="taskModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm">
+                        <div class="mb-3">
+                            <label class="form-label">Название задачи *</label>
+                            <input type="text" class="form-control" id="taskName" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Дата начала *</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Дата выполнения *</label>
+                                <input type="date" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Часы *</label>
+                                <input type="number" class="form-control" id="hours" min="0" step="0.5" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Ставка (₽/час) *</label>
+                                <input type="number" class="form-control" id="hourlyRate" min="0" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="addTask()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-window.deleteTask = deleteTask;
+    <!-- Модальное окно добавления оплаты -->
+    <div class="modal fade" id="paymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Учесть оплату</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Задача *</label>
+                            <select class="form-select" id="paymentTask" required>
+                                <option value="">Выберите задачу</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Сумма оплаты (₽) *</label>
+                            <input type="number" class="form-control" id="paymentAmount" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Дата оплаты *</label>
+                            <input type="date" class="form-control" id="paymentDate" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="addPayment()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-function editTask(id){
-  const t = store.tasks.find(x=>x.id===id);
-  if(!t) return;
-  const newName = prompt('Название', t.name);
-  if(newName === null) return;
-  const newHours = prompt('Часы', t.hours);
-  if(newHours === null) return;
-  const nh = parseFloat(newHours);
-  if(isNaN(nh) || nh <= 0){ flash('Часы должны быть > 0'); return; }
-  t.name = newName.trim();
-  t.hours = nh;
-  saveStore(store);
-  render();
-}
-window.editTask = editTask;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Хранение данных
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let payments = JSON.parse(localStorage.getItem('payments')) || [];
 
-addBtn.addEventListener('click', addTask);
-taskHours.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addTask(); });
-taskName.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ taskHours.focus(); } });
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderTasksTable();
+            populateMonthFilter();
+            updatePaymentTaskDropdown();
+            
+            // Установка текущей даты по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            document.getElementById('paymentDate').value = today;
+        });
 
-monthSelect.addEventListener('change', ()=>{
-  currentMonth = monthSelect.value;
-  render();
-});
+        // Добавление задачи
+        function addTask() {
+            const taskName = document.getElementById('taskName').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const hours = parseFloat(document.getElementById('hours').value);
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
 
-hourRateInput.addEventListener('blur', ()=>{
-  const v = Number(hourRateInput.value || 0);
-  setRateForMonth(currentMonth, v);
-  render();
-});
+            if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
 
-savePaid.addEventListener('click', ()=>{
-  const v = Number(paidInput.value || 0);
-  setPaidForMonth(currentMonth, v);
-  render();
-});
+            const task = {
+                id: Date.now(),
+                name: taskName,
+                startDate: startDate,
+                endDate: endDate,
+                hours: hours,
+                hourlyRate: hourlyRate,
+                cost: hours * hourlyRate,
+                paidAmount: 0
+            };
 
-exportCSV.addEventListener('click', ()=>{
-  const rows = [['id','date','name','hours','month','rate','amount','paid_for_month']];
-  store.tasks.forEach(t=>{
-    const rate = getRateForMonth(t.month);
-    rows.push([t.id,t.date,t.name,t.hours,t.month,rate, (t.hours*rate), getPaidForMonth(t.month)]);
-  });
-  const csv = rows.map(r=>r.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download = `paytracker_${currentMonth}.csv`; a.click();
-  URL.revokeObjectURL(url);
-});
+            tasks.push(task);
+            saveData();
+            updateStats();
+            renderTasksTable();
+            updatePaymentTaskDropdown();
+            
+            // Закрытие модального окна и сброс формы
+            bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+            document.getElementById('taskForm').reset();
+        }
 
-clearAllBtn.addEventListener('click', ()=>{
-  if(confirm('Удалить все данные локально? Это нельзя отменить.')){ store = {tasks:[], rates:{}, paid:{}}; saveStore(store); render(); }
-});
+        // Добавление оплаты
+        function addPayment() {
+            const taskId = parseInt(document.getElementById('paymentTask').value);
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const paymentDate = document.getElementById('paymentDate').value;
 
-/* ====== helpers ====== */
-function numberWithSpaces(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
-function flash(msg){ alert(msg); }
-function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+            if (!taskId || isNaN(amount) || !paymentDate) {
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
 
-/* ====== initial render ====== */
-render();
+            const payment = {
+                id: Date.now(),
+                taskId: taskId,
+                amount: amount,
+                date: paymentDate
+            };
 
-/* ====== install PWA hint ====== */
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installHint.style.display = 'inline-block';
-});
-installHint.addEventListener('click', async ()=>{
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    installHint.style.display='none';
-  } else {
-    alert('Открой меню браузера → "Добавить на экран домой"');
-  }
-});
+            payments.push(payment);
 
-/* ====== keyboard shortcut for fast add (for desktop testing) ====== */
-document.addEventListener('keydown', (e)=>{
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ taskName.focus(); }
-});
+            // Обновление суммы оплаты для задачи
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.paidAmount = (task.paidAmount || 0) + amount;
+            }
 
-/* ====== register service worker (for offline) ====== */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{/* ignore */});
-}
+            saveData();
+            updateStats();
+            renderTasksTable();
+            updatePaymentTaskDropdown();
+            
+            // Закрытие модального окна и сброс формы
+            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+            document.getElementById('paymentForm').reset();
+        }
 
-</script>
+        // Обновление выпадающего списка задач для оплаты
+        function updatePaymentTaskDropdown() {
+            const dropdown = document.getElementById('paymentTask');
+            dropdown.innerHTML = '<option value="">Выберите задачу</option>';
+            
+            tasks.forEach(task => {
+                const totalPaid = payments.filter(p => p.taskId === task.id)
+                    .reduce((sum, p) => sum + p.amount, 0);
+                
+                if (totalPaid < task.cost) {
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = `${task.name} (Осталось: ${(task.cost - totalPaid).toFixed(2)} ₽)`;
+                    dropdown.appendChild(option);
+                }
+            });
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            let filteredTasks = tasks;
+            let filteredPayments = payments;
+
+            if (selectedMonth !== 'all') {
+                filteredTasks = tasks.filter(task => {
+                    const taskMonth = task.endDate.substring(0, 7); // YYYY-MM
+                    return taskMonth === selectedMonth;
+                });
+
+                filteredPayments = payments.filter(payment => {
+                    const paymentMonth = payment.date.substring(0, 7);
+                    return paymentMonth === selectedMonth;
+                });
+            }
+
+            const totalTasks = filteredTasks.length;
+            const totalAmount = filteredTasks.reduce((sum, task) => sum + task.cost, 0);
+            const totalPaid = filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' ₽';
+            document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
+        }
+
+        // Отображение таблицы задач
+        function renderTasksTable() {
+            const table = document.getElementById('tasksTable');
+            table.innerHTML = '';
+
+            // Группировка задач по месяцам
+            const tasksByMonth = {};
+            tasks.forEach(task => {
+                const month = task.endDate.substring(0, 7); // YYYY-MM
+                if (!tasksByMonth[month]) {
+                    tasksByMonth[month] = [];
+                }
+                tasksByMonth[month].push(task);
+            });
+
+            // Сортировка месяцев по убыванию
+            const sortedMonths = Object.keys(tasksByMonth).sort().reverse();
+
+            sortedMonths.forEach(month => {
+                // Заголовок месяца
+                const monthRow = document.createElement('tr');
+                monthRow.className = 'month-group';
+                monthRow.innerHTML = `
+                    <td colspan="6">
+                        ${getMonthName(month)} ${month.substring(0,4)}
+                    </td>
+                `;
+                table.appendChild(monthRow);
+
+                // Задачи месяца
+                tasksByMonth[month].forEach(task => {
+                    const taskPayments = payments.filter(p => p.taskId === task.id);
+                    const totalPaid = taskPayments.reduce((sum, p) => sum + p.amount, 0);
+                    const status = totalPaid >= task.cost ? 'Оплачено' : 'Не оплачено';
+
+                    const row = document.createElement('tr');
+                    row.className = 'task-row';
+                    row.innerHTML = `
+                        <td>${task.name}</td>
+                        <td>${task.hours}</td>
+                        <td>${task.hourlyRate} ₽</td>
+                        <td>${task.cost.toFixed(2)} ₽</td>
+                        <td>${totalPaid.toFixed(2)} ₽</td>
+                        <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
+                    `;
+                    table.appendChild(row);
+
+                    // Детали оплат
+                    if (taskPayments.length > 0) {
+                        taskPayments.forEach(payment => {
+                            const paymentRow = document.createElement('tr');
+                            paymentRow.className = 'table-light';
+                            paymentRow.innerHTML = `
+                                <td colspan="4" class="small text-muted">Оплата: ${new Date(payment.date).toLocaleDateString()}</td>
+                                <td class="small text-muted">+${payment.amount.toFixed(2)} ₽</td>
+                                <td></td>
+                            `;
+                            table.appendChild(paymentRow);
+                        });
+                    }
+                });
+            });
+        }
+
+        // Заполнение фильтра месяцев
+        function populateMonthFilter() {
+            const filter = document.getElementById('monthFilter');
+            const months = new Set();
+
+            // Добавляем месяцы из задач
+            tasks.forEach(task => {
+                months.add(task.endDate.substring(0, 7));
+            });
+
+            // Добавляем месяцы из оплат
+            payments.forEach(payment => {
+                months.add(payment.date.substring(0, 7));
+            });
+
+            // Сортировка и добавление в фильтр
+            Array.from(months).sort().reverse().forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = `${getMonthName(month)} ${month.substring(0,4)}`;
+                filter.appendChild(option);
+            });
+        }
+
+        // Вспомогательная функция для получения названия месяца
+        function getMonthName(monthString) {
+            const date = new Date(monthString + '-01');
+            return date.toLocaleString('ru-RU', { month: 'long' });
+        }
+
+        // Сохранение данных в localStorage
+        function saveData() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('payments', JSON.stringify(payments));
+        }
+
+        // Обработчик изменения фильтра
+        document.getElementById('monthFilter').addEventListener('change', updateStats);
+    </script>
 </body>
 </html>
-
