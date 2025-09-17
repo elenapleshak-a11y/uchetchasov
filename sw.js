@@ -1,44 +1,32 @@
-const CACHE_NAME = 'task-payments-v2';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+const CACHE_NAME = 'task-payments-v4';
+const APP_URL = 'https://elenapleshak-a11y.github.io/task-manager/';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        return cache.addAll([
+          APP_URL,
+          APP_URL + 'index.html',
+          APP_URL + 'manifest.json'
+        ]);
       })
   );
 });
 
 self.addEventListener('fetch', function(event) {
+  // Перенаправляем все запросы на правильный URL
+  if (event.request.url === 'https://elenapleshak-a11y.github.io/') {
+    event.respondWith(
+      Response.redirect(APP_URL, 301)
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
-});
-
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+        return response || fetch(event.request);
+      })
   );
 });
