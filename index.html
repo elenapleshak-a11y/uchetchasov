@@ -104,9 +104,6 @@
     </div>
   </div>
 
-  <footer>
-    Сделано честно — без фраз про «вдох». Нужны интеграции (Google/icloud/backup)? Скажи — и дам варианты.
-  </footer>
 </div>
 
 <script>
@@ -114,6 +111,42 @@
 const LS_KEY = 'paytracker_v1';
 function loadStore(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || {tasks:[], rates:{}, paid:{}} } catch(e){ return {tasks:[], rates:{}, paid:{}} } }
 function saveStore(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+  let bynRate = null;
+let lastRateDate = localStorage.getItem('bynRateDate');
+let savedRate = localStorage.getItem('bynRate');
+
+// если есть сохранённый курс и он на сегодня — берём из localStorage
+if (savedRate && lastRateDate === new Date().toISOString().slice(0,10)) {
+  bynRate = parseFloat(savedRate);
+} else {
+  fetchRates();
+}
+
+async function fetchRates() {
+  try {
+    const resp = await fetch('https://www.cbr-xml-daily.ru/daily_json.js');
+    const data = await resp.json();
+    const valute = data.Valute.BYN;
+    if (valute) {
+      // ЦБ даёт курс: сколько рублей за 1 BYN
+      // нам нужно наоборот → сколько BYN за 1 рубль
+      const rub_to_byn = 1 / valute.Value;
+      bynRate = rub_to_byn;
+      localStorage.setItem('bynRate', bynRate);
+      localStorage.setItem('bynRateDate', new Date().toISOString().slice(0,10));
+      render();
+    }
+  } catch (e) {
+    console.error('Ошибка загрузки курса BYN:', e);
+  }
+}
+
+function formatWithBYN(rubAmount) {
+  if (bynRate === null) return '';
+  const bynAmount = rubAmount * bynRate;
+  return ` (≈ BYN ${bynAmount.toFixed(2)})`;
+}
+
 
 let store = loadStore();
 
