@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Учет задач">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#6c5ce7">
     <title>Учет задач и оплат</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
+    
+    <!-- PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Учет задач">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#6c5ce7">
+    
     <style>
         .card-header {
             background-color: #6c5ce7;
@@ -24,6 +27,21 @@
         .stats-card {
             background-color: #f8f9fa;
             border-left: 4px solid #6c5ce7;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stats-card h6 {
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .stats-card h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            white-space: nowrap;
         }
         .table-responsive {
             max-height: 50vh;
@@ -49,35 +67,16 @@
             padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
         }
-        .stats-card {
-    background-color: #f8f9fa;
-    border-left: 4px solid #6c5ce7;
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-.stats-card h6 {
-    font-size: 0.8rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.stats-card h4 {
-    font-size: 1.2rem;
-    font-weight: bold;
-    white-space: nowrap;
-}
 
-/* Для планшетов и десктопов */
-@media (min-width: 768px) {
-    .stats-card h6 {
-        font-size: 0.9rem;
-    }
-    .stats-card h4 {
-        font-size: 1.4rem;
-    }
-}
+        /* Для планшетов и десктопов */
+        @media (min-width: 768px) {
+            .stats-card h6 {
+                font-size: 0.9rem;
+            }
+            .stats-card h4 {
+                font-size: 1.4rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -88,46 +87,55 @@
         </header>
 
         <!-- Блок с общей информацией -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Общая статистика</span>
-                <select id="monthFilter" class="form-select form-select-sm" style="width: auto;">
-                    <option value="all">Все месяцы</option>
-                </select>
-            </div>
-            <div class="card-body">
-                <div class="row row-cols-2 row-cols-md-4 g-2 text-center">
-                    <div class="col">
-                        <div class="stats-card p-2 p-md-3 rounded">
-                            <h6 class="mb-1">Задач</h6>
-                            <h4 id="totalTasks" class="mb-0">0</h4>
-                        </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Общая статистика</span>
+                        <select id="monthFilter" class="form-select form-select-sm" style="width: auto;">
+                            <option value="all">Все месяцы</option>
+                        </select>
                     </div>
-                    <div class="col">
-                        <div class="stats-card p-2 p-md-3 rounded">
-                            <h6 class="mb-1">Часы</h6>
-                            <h4 id="totalHours" class="mb-0">0</h4>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="stats-card p-2 p-md-3 rounded">
-                            <h6 class="mb-1">Сумма</h6>
-                            <h4 id="totalAmount" class="mb-0">0 ₽</h4>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="stats-card p-2 p-md-3 rounded">
-                            <h6 class="mb-1">Получено</h6>
-                            <h4 id="totalPaid" class="mb-0">0 ₽</h4>
+                    <div class="card-body">
+                        <div class="row row-cols-2 row-cols-md-4 g-2 text-center">
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded">
+                                    <h6 class="mb-1">Задач</h6>
+                                    <h4 id="totalTasks" class="mb-0">0</h4>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded">
+                                    <h6 class="mb-1">Часы</h6>
+                                    <h4 id="totalHours" class="mb-0">0</h4>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded">
+                                    <h6 class="mb-1">Сумма</h6>
+                                    <h4 id="totalAmount" class="mb-0">0 ₽</h4>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded">
+                                    <h6 class="mb-1">Получено</h6>
+                                    <h4 id="totalPaid" class="mb-0">0 ₽</h4>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+        <!-- Кнопка установки PWA -->
+        <div class="row mb-2" id="installButtonContainer" style="display: none;">
+            <div class="col-12">
+                <button class="btn btn-outline-success w-100" id="installButton">
+                    <i class="fas fa-download me-2"></i>Установить приложение
+                </button>
+            </div>
+        </div>
 
         <!-- Кнопки управления -->
         <div class="row mb-4">
@@ -143,45 +151,37 @@
             </div>
         </div>
 
-        <!-- Кнопка установки PWA (показывается только если можно установить) -->
-<div class="row mb-2" id="installButtonContainer" style="display: none;">
-    <div class="col-12">
-        <button class="btn btn-outline-success w-100" id="installButton">
-            <i class="fas fa-download me-2"></i>Установить приложение
-        </button>
-    </div>
-</div>
-
         <!-- Таблица задач -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <span>Список задач и оплат</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Задача</th>
-                                <th>Часы</th>
-                                <th>Ставка</th>
-                                <th>Стоимость</th>
-                                <th>Оплачено</th>
-                                <th>Статус</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tasksTable">
-                            <!-- Задачи будут здесь -->
-                        </tbody>
-                    </table>
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <span>Список задач и оплат</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Задача</th>
+                                        <th>Часы</th>
+                                        <th>Ставка</th>
+                                        <th>Стоимость</th>
+                                        <th>Оплачено</th>
+                                        <th>Статус</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasksTable">
+                                    <!-- Задачи будут здесь -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Модальное окно добавления задачи -->
     <div class="modal fade" id="taskModal" tabindex="-1">
@@ -262,379 +262,350 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-    // Хранение данных
-    let tasks = [];
-    let payments = [];
+        // Хранение данных
+        let tasks = [];
+        let payments = [];
+        let deferredPrompt;
 
-        // PWA Installation
-let deferredPrompt;
-const installButton = document.getElementById('installButton');
-const installButtonContainer = document.getElementById('installButtonContainer');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installButtonContainer.style.display = 'block';
-});
-
-installButton.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            installButtonContainer.style.display = 'none';
-        }
-        deferredPrompt = null;
-    }
-});
-
-window.addEventListener('appinstalled', () => {
-    installButtonContainer.style.display = 'none';
-    deferredPrompt = null;
-});
-
-    // Инициализация приложения
-    document.addEventListener('DOMContentLoaded', function() {
-        // Загружаем данные из localStorage
-        tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        payments = JSON.parse(localStorage.getItem('payments')) || [];
-        
-        updateStats();
-        renderTasksTable();
-        populateMonthFilter();
-        updatePaymentTaskDropdown();
-        
-        // Установка текущей даты по умолчанию
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('startDate').value = today;
-        document.getElementById('endDate').value = today;
-        document.getElementById('paymentDate').value = today;
-    });
-
-    // Добавление задачи
-    function addTask() {
-        const taskName = document.getElementById('taskName').value;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const hours = parseFloat(document.getElementById('hours').value);
-        const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
-
-        if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
-            alert('Пожалуйста, заполните все обязательные поля');
-            return;
-        }
-
-        const task = {
-            id: Date.now(),
-            name: taskName,
-            startDate: startDate,
-            endDate: endDate,
-            hours: hours,
-            hourlyRate: hourlyRate,
-            cost: hours * hourlyRate,
-            paidAmount: 0
-        };
-
-        tasks.push(task);
-        saveData();
-        updateStats();
-        renderTasksTable();
-        populateMonthFilter();
-        updatePaymentTaskDropdown();
-        
-        // Закрытие модального окна и сброс формы
-        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-        document.getElementById('taskForm').reset();
-    }
-
-    // Добавление оплаты
-    function addPayment() {
-        const taskId = parseInt(document.getElementById('paymentTask').value);
-        const amount = parseFloat(document.getElementById('paymentAmount').value);
-        const paymentDate = document.getElementById('paymentDate').value;
-
-        if (!taskId || isNaN(amount) || !paymentDate) {
-            alert('Пожалуйста, заполните все обязательные поля');
-            return;
-        }
-
-        const payment = {
-            id: Date.now(),
-            taskId: taskId,
-            amount: amount,
-            date: paymentDate
-        };
-
-        payments.push(payment);
-
-        // Обновление суммы оплаты для задачи
-        const task = tasks.find(t => t.id === taskId);
-        if (task) {
-            task.paidAmount = (task.paidAmount || 0) + amount;
-        }
-
-        saveData();
-        updateStats();
-        renderTasksTable();
-        populateMonthFilter();
-        updatePaymentTaskDropdown();
-        
-        // Закрытие модального окна и сброс формы
-        bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-        document.getElementById('paymentForm').reset();
-    }
-
-    // Удаление задачи
-    function deleteTask(taskId) {
-        if (!confirm('Вы уверены, что хотите удалить эту задачу? Все связанные оплаты также будут удалены.')) {
-            return;
-        }
-
-        // Удаляем задачу
-        tasks = tasks.filter(task => task.id !== taskId);
-        
-        // Удаляем связанные оплаты
-        payments = payments.filter(payment => payment.taskId !== taskId);
-
-        saveData();
-        updateStats();
-        renderTasksTable();
-        populateMonthFilter();
-        updatePaymentTaskDropdown();
-    }
-
-    // Обновление выпадающего списка задач для оплаты
-    function updatePaymentTaskDropdown() {
-        const dropdown = document.getElementById('paymentTask');
-        dropdown.innerHTML = '<option value="">Выберите задачу</option>';
-        
-        tasks.forEach(task => {
-            const totalPaid = payments.filter(p => p.taskId === task.id)
-                .reduce((sum, p) => sum + p.amount, 0);
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загружаем данные из localStorage
+            tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            payments = JSON.parse(localStorage.getItem('payments')) || [];
             
-            if (totalPaid < task.cost) {
-                const option = document.createElement('option');
-                option.value = task.id;
-                option.textContent = `${task.name} (Осталось: ${(task.cost - totalPaid).toFixed(2)} ₽)`;
-                dropdown.appendChild(option);
-            }
-        });
-    }
+            updateStats();
+            renderTasksTable();
+            populateMonthFilter();
+            updatePaymentTaskDropdown();
+            
+            // Установка текущей даты по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            document.getElementById('paymentDate').value = today;
 
-    // Обновление статистики
-    function updateStats() {
-        const selectedMonth = document.getElementById('monthFilter').value;
-        let filteredTasks = tasks;
-        let filteredPayments = payments;
-
-        if (selectedMonth !== 'all') {
-            filteredTasks = tasks.filter(task => {
-                const taskMonth = task.endDate.substring(0, 7); // YYYY-MM
-                return taskMonth === selectedMonth;
-            });
-
-            filteredPayments = payments.filter(payment => {
-                const paymentMonth = payment.date.substring(0, 7);
-                return paymentMonth === selectedMonth;
-            });
-        }
-
-        const totalTasks = filteredTasks.length;
-        const totalHours = filteredTasks.reduce((sum, task) => sum + task.hours, 0);
-        const totalAmount = filteredTasks.reduce((sum, task) => sum + task.cost, 0);
-        const totalPaid = filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
-
-        document.getElementById('totalTasks').textContent = totalTasks;
-        document.getElementById('totalHours').textContent = totalHours.toFixed(1);
-        document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' ₽';
-        document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
-    }
-
-    // Отображение таблицы задач
-    function renderTasksTable() {
-        const table = document.getElementById('tasksTable');
-        table.innerHTML = '';
-
-        // Группировка задач по месяцам
-        const tasksByMonth = {};
-        tasks.forEach(task => {
-            const month = task.endDate.substring(0, 7); // YYYY-MM
-            if (!tasksByMonth[month]) {
-                tasksByMonth[month] = [];
-            }
-            tasksByMonth[month].push(task);
+            // PWA функциональность
+            initPWA();
         });
 
-        // Сортировка месяцев по убыванию
-        const sortedMonths = Object.keys(tasksByMonth).sort().reverse();
+        // Инициализация PWA
+        function initPWA() {
+            const installButton = document.getElementById('installButton');
+            const installButtonContainer = document.getElementById('installButtonContainer');
 
-        sortedMonths.forEach(month => {
-            // Заголовок месяца
-            const monthRow = document.createElement('tr');
-            monthRow.className = 'month-group';
-            monthRow.innerHTML = `
-                <td colspan="7">
-                    ${getMonthName(month)} ${month.substring(0,4)}
-                </td>
-            `;
-            table.appendChild(monthRow);
-
-            // Задачи месяца
-            tasksByMonth[month].forEach(task => {
-                const taskPayments = payments.filter(p => p.taskId === task.id);
-                const totalPaid = taskPayments.reduce((sum, p) => sum + p.amount, 0);
-                const status = totalPaid >= task.cost ? 'Оплачено' : 'Не оплачено';
-
-                const row = document.createElement('tr');
-                row.className = 'task-row';
-                row.innerHTML = `
-                    <td>${task.name}</td>
-                    <td>${task.hours}</td>
-                    <td>${task.hourlyRate} ₽</td>
-                    <td>${task.cost.toFixed(2)} ₽</td>
-                    <td>${totalPaid.toFixed(2)} ₽</td>
-                    <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                table.appendChild(row);
-
-                // Детали оплат
-                if (taskPayments.length > 0) {
-                    taskPayments.forEach(payment => {
-                        const paymentRow = document.createElement('tr');
-                        paymentRow.className = 'table-light';
-                        paymentRow.innerHTML = `
-                            <td colspan="5" class="small text-muted">Оплата: ${new Date(payment.date).toLocaleDateString()}</td>
-                            <td class="small text-muted">+${payment.amount.toFixed(2)} ₽</td>
-                            <td></td>
-                        `;
-                        table.appendChild(paymentRow);
+            // Регистрация Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(error) {
+                        console.log('SW registration failed: ', error);
                     });
+            }
+
+            // Обработчик установки PWA
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installButtonContainer.style.display = 'block';
+            });
+
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installButtonContainer.style.display = 'none';
+                    }
+                    deferredPrompt = null;
                 }
             });
-        });
 
-        // Если задач нет, показываем сообщение
-        if (tasks.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td colspan="7" class="text-center text-muted py-4">
-                    <i class="fas fa-tasks fa-2x mb-2"></i>
-                    <p>Нет добавленных задач</p>
-                </td>
-            `;
-            table.appendChild(emptyRow);
-        }
-    }
-
-    // Заполнение фильтра месяцев
-    function populateMonthFilter() {
-        const filter = document.getElementById('monthFilter');
-        const currentValue = filter.value; // Сохраняем текущее значение
-        
-        // Очищаем все опции кроме "Все месяцы"
-        while (filter.options.length > 1) {
-            filter.remove(1);
+            window.addEventListener('appinstalled', () => {
+                installButtonContainer.style.display = 'none';
+                deferredPrompt = null;
+            });
         }
 
-        const months = new Set();
+        // Добавление задачи
+        function addTask() {
+            const taskName = document.getElementById('taskName').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const hours = parseFloat(document.getElementById('hours').value);
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
 
-        // Добавляем месяцы из задач
-        tasks.forEach(task => {
-            if (task.endDate) {
-                months.add(task.endDate.substring(0, 7));
+            if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
             }
-        });
 
-        // Добавляем месяцы из оплат
-        payments.forEach(payment => {
-            if (payment.date) {
-                months.add(payment.date.substring(0, 7));
-            }
-        });
+            const task = {
+                id: Date.now(),
+                name: taskName,
+                startDate: startDate,
+                endDate: endDate,
+                hours: hours,
+                hourlyRate: hourlyRate,
+                cost: hours * hourlyRate,
+                paidAmount: 0
+            };
 
-        // Сортировка и добавление в фильтр
-        Array.from(months).sort().reverse().forEach(month => {
-            const option = document.createElement('option');
-            option.value = month;
-            option.textContent = `${getMonthName(month)} ${month.substring(0,4)}`;
-            filter.appendChild(option);
-        });
-
-        // Восстанавливаем предыдущее значение или устанавливаем "all"
-        if (filter.querySelector(`option[value="${currentValue}"]`)) {
-            filter.value = currentValue;
-        } else {
-            filter.value = 'all';
+            tasks.push(task);
+            saveData();
+            updateStats();
+            renderTasksTable();
+            populateMonthFilter();
+            updatePaymentTaskDropdown();
+            
+            // Закрытие модального окна и сброс формы
+            bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+            document.getElementById('taskForm').reset();
         }
-    }
 
-    // Вспомогательная функция для получения названия месяца
-    function getMonthName(monthString) {
-        const date = new Date(monthString + '-01');
-        return date.toLocaleString('ru-RU', { month: 'long' });
-    }
+        // Добавление оплаты
+        function addPayment() {
+            const taskId = parseInt(document.getElementById('paymentTask').value);
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const paymentDate = document.getElementById('paymentDate').value;
 
-    // Сохранение данных в localStorage
-    function saveData() {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-        localStorage.setItem('payments', JSON.stringify(payments));
-    }
+            if (!taskId || isNaN(amount) || !paymentDate) {
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
 
-    // Обработчик изменения фильтра
-    document.getElementById('monthFilter').addEventListener('change', updateStats);
-</script>
-        <script>
-    // Регистрация Service Worker для PWA
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('./sw.js')
-                .then(function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                })
-                .catch(function(error) {
-                    console.log('ServiceWorker registration failed: ', error);
+            const payment = {
+                id: Date.now(),
+                taskId: taskId,
+                amount: amount,
+                date: paymentDate
+            };
+
+            payments.push(payment);
+
+            // Обновление суммы оплаты для задачи
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.paidAmount = (task.paidAmount || 0) + amount;
+            }
+
+            saveData();
+            updateStats();
+            renderTasksTable();
+            populateMonthFilter();
+            updatePaymentTaskDropdown();
+            
+            // Закрытие модального окна и сброс формы
+            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+            document.getElementById('paymentForm').reset();
+        }
+
+        // Удаление задачи
+        function deleteTask(taskId) {
+            if (!confirm('Вы уверены, что хотите удалить эту задачу? Все связанные оплаты также будут удалены.')) {
+                return;
+            }
+
+            // Удаляем задачу
+            tasks = tasks.filter(task => task.id !== taskId);
+            
+            // Удаляем связанные оплаты
+            payments = payments.filter(payment => payment.taskId !== taskId);
+
+            saveData();
+            updateStats();
+            renderTasksTable();
+            populateMonthFilter();
+            updatePaymentTaskDropdown();
+        }
+
+        // Обновление выпадающего списка задач для оплаты
+        function updatePaymentTaskDropdown() {
+            const dropdown = document.getElementById('paymentTask');
+            dropdown.innerHTML = '<option value="">Выберите задачу</option>';
+            
+            tasks.forEach(task => {
+                const totalPaid = payments.filter(p => p.taskId === task.id)
+                    .reduce((sum, p) => sum + p.amount, 0);
+                
+                if (totalPaid < task.cost) {
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = `${task.name} (Осталось: ${(task.cost - totalPaid).toFixed(2)} ₽)`;
+                    dropdown.appendChild(option);
+                }
+            });
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            let filteredTasks = tasks;
+            let filteredPayments = payments;
+
+            if (selectedMonth !== 'all') {
+                filteredTasks = tasks.filter(task => {
+                    const taskMonth = task.endDate.substring(0, 7); // YYYY-MM
+                    return taskMonth === selectedMonth;
                 });
-        });
-    }
 
-    // Проверка, запущено ли приложение как PWA
-    function isRunningAsPWA() {
-        return (window.matchMedia('(display-mode: standalone)').matches) || 
-               (window.navigator.standalone) ||
-               (document.referrer.includes('android-app://'));
-    }
-
-    // Показать инструкцию по установке
-    if (!isRunningAsPWA() && 'serviceWorker' in navigator) {
-        setTimeout(function() {
-            if (confirm('Хотите установить это приложение на главный экран для удобного доступа?')) {
-                showInstallInstructions();
+                filteredPayments = payments.filter(payment => {
+                    const paymentMonth = payment.date.substring(0, 7);
+                    return paymentMonth === selectedMonth;
+                });
             }
-        }, 3000);
-    }
 
-    function showInstallInstructions() {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isAndroid = /Android/.test(navigator.userAgent);
-        
-        let message = '';
-        
-        if (isIOS) {
-            message = 'Для установки на iOS:\n1. Нажмите кнопку "Поделиться"\n2. Выберите "На экран "Домой"\n3. Нажмите "Добавить"';
-        } else if (isAndroid) {
-            message = 'Для установки на Android:\n1. Нажмите меню (три точки)\n2. Выберите "Добавить на главный экран"\n3. Нажмите "Добавить"';
-        } else {
-            message = 'В меню браузера выберите "Установить приложение" или "Добавить на главный экран"';
+            const totalTasks = filteredTasks.length;
+            const totalHours = filteredTasks.reduce((sum, task) => sum + task.hours, 0);
+            const totalAmount = filteredTasks.reduce((sum, task) => sum + task.cost, 0);
+            const totalPaid = filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' ₽';
+            document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
         }
-        
-        alert(message);
-    }
-</script>
+
+        // Отображение таблицы задач
+        function renderTasksTable() {
+            const table = document.getElementById('tasksTable');
+            table.innerHTML = '';
+
+            // Группировка задач по месяцам
+            const tasksByMonth = {};
+            tasks.forEach(task => {
+                const month = task.endDate.substring(0, 7); // YYYY-MM
+                if (!tasksByMonth[month]) {
+                    tasksByMonth[month] = [];
+                }
+                tasksByMonth[month].push(task);
+            });
+
+            // Сортировка месяцев по убыванию
+            const sortedMonths = Object.keys(tasksByMonth).sort().reverse();
+
+            sortedMonths.forEach(month => {
+                // Заголовок месяца
+                const monthRow = document.createElement('tr');
+                monthRow.className = 'month-group';
+                monthRow.innerHTML = `
+                    <td colspan="7">
+                        ${getMonthName(month)} ${month.substring(0,4)}
+                    </td>
+                `;
+                table.appendChild(monthRow);
+
+                // Задачи месяца
+                tasksByMonth[month].forEach(task => {
+                    const taskPayments = payments.filter(p => p.taskId === task.id);
+                    const totalPaid = taskPayments.reduce((sum, p) => sum + p.amount, 0);
+                    const status = totalPaid >= task.cost ? 'Оплачено' : 'Не оплачено';
+
+                    const row = document.createElement('tr');
+                    row.className = 'task-row';
+                    row.innerHTML = `
+                        <td>${task.name}</td>
+                        <td>${task.hours}</td>
+                        <td>${task.hourlyRate} ₽</td>
+                        <td>${task.cost.toFixed(2)} ₽</td>
+                        <td>${totalPaid.toFixed(2)} ₽</td>
+                        <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    table.appendChild(row);
+
+                    // Детали оплат
+                    if (taskPayments.length > 0) {
+                        taskPayments.forEach(payment => {
+                            const paymentRow = document.createElement('tr');
+                            paymentRow.className = 'table-light';
+                            paymentRow.innerHTML = `
+                                <td colspan="5" class="small text-muted">Оплата: ${new Date(payment.date).toLocaleDateString()}</td>
+                                <td class="small text-muted">+${payment.amount.toFixed(2)} ₽</td>
+                                <td></td>
+                            `;
+                            table.appendChild(paymentRow);
+                        });
+                    }
+                });
+            });
+
+            // Если задач нет, показываем сообщение
+            if (tasks.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="7" class="text-center text-muted py-4">
+                        <i class="fas fa-tasks fa-2x mb-2"></i>
+                        <p>Нет добавленных задач</p>
+                    </td>
+                `;
+                table.appendChild(emptyRow);
+            }
+        }
+
+        // Заполнение фильтра месяцев
+        function populateMonthFilter() {
+            const filter = document.getElementById('monthFilter');
+            const currentValue = filter.value; // Сохраняем текущее значение
+            
+            // Очищаем все опции кроме "Все месяцы"
+            while (filter.options.length > 1) {
+                filter.remove(1);
+            }
+
+            const months = new Set();
+
+            // Добавляем месяцы из задач
+            tasks.forEach(task => {
+                if (task.endDate) {
+                    months.add(task.endDate.substring(0, 7));
+                }
+            });
+
+            // Добавляем месяцы из оплат
+            payments.forEach(payment => {
+                if (payment.date) {
+                    months.add(payment.date.substring(0, 7));
+                }
+            });
+
+            // Сортировка и добавление в фильтр
+            Array.from(months).sort().reverse().forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = `${getMonthName(month)} ${month.substring(0,4)}`;
+                filter.appendChild(option);
+            });
+
+            // Восстанавливаем предыдущее значение или устанавливаем "all"
+            if (filter.querySelector(`option[value="${currentValue}"]`)) {
+                filter.value = currentValue;
+            } else {
+                filter.value = 'all';
+            }
+        }
+
+        // Вспомогательная функция для получения названия месяца
+        function getMonthName(monthString) {
+            const date = new Date(monthString + '-01');
+            return date.toLocaleString('ru-RU', { month: 'long' });
+        }
+
+        // Сохранение данных в localStorage
+        function saveData() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('payments', JSON.stringify(payments));
+        }
+
+        // Обработчик изменения фильтра
+        document.getElementById('monthFilter').addEventListener('change', updateStats);
+    </script>
 </body>
 </html>
