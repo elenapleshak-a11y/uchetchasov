@@ -548,5 +548,52 @@
     // Обработчик изменения фильтра
     document.getElementById('monthFilter').addEventListener('change', updateStats);
 </script>
+        <script>
+    // Регистрация Service Worker для PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./sw.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+        });
+    }
+
+    // Проверка, запущено ли приложение как PWA
+    function isRunningAsPWA() {
+        return (window.matchMedia('(display-mode: standalone)').matches) || 
+               (window.navigator.standalone) ||
+               (document.referrer.includes('android-app://'));
+    }
+
+    // Показать инструкцию по установке
+    if (!isRunningAsPWA() && 'serviceWorker' in navigator) {
+        setTimeout(function() {
+            if (confirm('Хотите установить это приложение на главный экран для удобного доступа?')) {
+                showInstallInstructions();
+            }
+        }, 3000);
+    }
+
+    function showInstallInstructions() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        
+        let message = '';
+        
+        if (isIOS) {
+            message = 'Для установки на iOS:\n1. Нажмите кнопку "Поделиться"\n2. Выберите "На экран "Домой"\n3. Нажмите "Добавить"';
+        } else if (isAndroid) {
+            message = 'Для установки на Android:\n1. Нажмите меню (три точки)\n2. Выберите "Добавить на главный экран"\n3. Нажмите "Добавить"';
+        } else {
+            message = 'В меню браузера выберите "Установить приложение" или "Добавить на главный экран"';
+        }
+        
+        alert(message);
+    }
+</script>
 </body>
 </html>
