@@ -1,8 +1,8 @@
 {
   "name": "Учет задач и оплат",
-  "short_name": "TaskPayments",
+  "short_name": "УчетЧасов",
   "description": "Приложение для учета выполненных задач и полученных оплат",
-  "start_url": "/task-manager/",
+  "start_url": "/uchetchasov/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6c5ce7",
