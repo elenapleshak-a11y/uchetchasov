@@ -473,12 +473,12 @@
 
             if (selectedMonth !== 'all') {
                 filteredTasks = tasks.filter(task => {
-                    const taskMonth = task.endDate.substring(0, 7); // YYYY-MM
+                    const taskMonth = task.endDate.substring(0, 8); // YYYY-MM
                     return taskMonth === selectedMonth;
                 });
 
                 filteredPayments = payments.filter(payment => {
-                    const paymentMonth = payment.date.substring(0, 7);
+                    const paymentMonth = payment.date.substring(0, 8);
                     return paymentMonth === selectedMonth;
                 });
             }
@@ -502,7 +502,7 @@
             // Группировка задач по месяцам
             const tasksByMonth = {};
             tasks.forEach(task => {
-                const month = task.endDate.substring(0, 7); // YYYY-MM
+                const month = task.endDate.substring(0, 8); // YYYY-MM
                 if (!tasksByMonth[month]) {
                     tasksByMonth[month] = [];
                 }
@@ -565,7 +565,7 @@ if (taskPayments.length > 0) {
             if (tasks.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="8" class="text-center text-muted py-4">
                         <i class="fas fa-tasks fa-2x mb-2"></i>
                         <p>Нет добавленных задач</p>
                     </td>
@@ -589,14 +589,14 @@ if (taskPayments.length > 0) {
             // Добавляем месяцы из задач
             tasks.forEach(task => {
                 if (task.endDate) {
-                    months.add(task.endDate.substring(0, 7));
+                    months.add(task.endDate.substring(0, 8));
                 }
             });
 
             // Добавляем месяцы из оплат
             payments.forEach(payment => {
                 if (payment.date) {
-                    months.add(payment.date.substring(0, 7));
+                    months.add(payment.date.substring(0, 8));
                 }
             });
 
