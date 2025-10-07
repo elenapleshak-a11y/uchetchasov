@@ -228,6 +228,17 @@
                                 <input type="number" class="form-control" id="hourlyRate" min="0" required>
                             </div>
                         </div>
+                        <div class="mb-3">
+                            
+                      <label class="form-label">Категория *</label>
+                      <select class="form-select" id="taskCategory" required>
+                        <option value="">Выберите категорию</option>
+                        <option value="debit">Дебиторская задолженность</option>
+                        <option value="credit">Кредиторская задолженность</option>
+                        <option value="income">Фактический доход</option>
+                      </select>
+                    </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -349,10 +360,17 @@
             const hours = parseFloat(document.getElementById('hours').value);
             const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
 
+            const category = document.getElementById('taskCategory').value;
+            if (!category) {
+              alert('Выберите категорию задачи');
+              return;
+                }
+
+
             if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
                 alert('Пожалуйста, заполните все обязательные поля');
                 return;
-            }
+                }
 
             const task = {
                 id: Date.now(),
@@ -363,7 +381,8 @@
                 hourlyRate: hourlyRate,
                 cost: hours * hourlyRate,
                 paidAmount: 0
-            };
+                category: category
+                };
 
             tasks.push(task);
             saveData();
