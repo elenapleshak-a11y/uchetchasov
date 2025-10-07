@@ -360,6 +360,12 @@
     const endDate = document.getElementById('endDate').value;
     const hours = parseFloat(document.getElementById('hours').value);
     const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const category = document.getElementById('taskCategory').value;
+        if (!category) {
+          alert('Выберите тип дохода');
+          return;
+        }
+
 
     if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
         alert('Пожалуйста, заполните все обязательные поля');
@@ -388,6 +394,7 @@
         hourlyRate: hourlyRate,
         cost: hours * hourlyRate,
         paidAmount: 0
+        category: category
     };
 
     tasks.push(task);
