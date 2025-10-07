@@ -813,14 +813,5 @@ function editTask(taskId) {
     <div><strong>Статус:</strong> <span id="debug-status">✅ OK</span></div>
 </div>
 
-<script>
-    // Отладочная информация
-    document.getElementById('debug-url').textContent = window.location.href;
-    
-    if (!window.location.href.includes('uchetchasov')) {
-        document.getElementById('debug-status').textContent = '❌ Wrong URL';
-        document.getElementById('debug-status').style.color = 'red';
-    }
-</script>
 </body>
 </html>
