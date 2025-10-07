@@ -356,7 +356,62 @@
 
         // Добавление задачи
         function addTask() {
-  alert('Функция работает!');
+            console.log('addTask вызвана');
+
+  const taskName = document.getElementById('taskName').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const category = document.getElementById('taskCategory').value;
+
+    if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate) || !category) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end < start) {
+        alert('Дата выполнения не может быть раньше даты начала!');
+        return;
+    }
+
+    const daysToComplete = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    const task = {
+        id: Date.now(),
+        name: taskName,
+        startDate: startDate,
+        endDate: endDate,
+        daysToComplete: daysToComplete,
+        hours: hours,
+        hourlyRate: hourlyRate,
+        cost: hours * hourlyRate,
+        paidAmount: 0,
+        category: category
+    };
+
+    const editingId = document.getElementById('taskForm').dataset.editingId;
+    if (editingId) {
+        const index = tasks.findIndex(t => t.id == editingId);
+        if (index !== -1) {
+            tasks[index] = task;
+        }
+        delete document.getElementById('taskForm').dataset.editingId;
+    } else {
+        tasks.push(task);
+    }
+
+    saveData();
+    updateStats();
+    renderTasksTable();
+    populateMonthFilter();
+    updatePaymentTaskDropdown();
+
+    bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+    document.getElementById('taskForm').reset();
 }
 
   
