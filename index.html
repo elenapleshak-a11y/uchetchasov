@@ -230,6 +230,16 @@
                                 <input type="number" class="form-control" id="hourlyRate" min="0" required>
                             </div>
                         </div>
+                        <div class="mb-3">
+                              <label class="form-label">Тип дохода *</label>
+                              <select class="form-select" id="taskCategory" required>
+                                <option value="">Выберите тип</option>
+                                <option value="debit">Дебиторская задолженность</option>
+                                <option value="credit">Кредиторская задолженность</option>
+                                <option value="income">Фактический доход</option>
+                              </select>
+                        </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
