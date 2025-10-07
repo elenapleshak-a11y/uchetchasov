@@ -183,6 +183,7 @@
             <th>Оплачено</th>
             <th>Статус</th>
             <th>Действия</th>
+            <th>Тип дохода</th>
         </tr>
     </thead>
     <tbody id="tasksTable">
@@ -511,6 +512,16 @@
             document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
         }
 
+        //Отображение типа оплат
+        function getCategoryLabel(code) {
+    switch (code) {
+        case 'debit': return 'Дебиторская';
+        case 'credit': return 'Кредиторская';
+        case 'income': return 'Фактический доход';
+        default: return '—';
+    }
+}
+
         // Отображение таблицы задач
         function renderTasksTable() {
             const table = document.getElementById('tasksTable');
@@ -556,6 +567,7 @@ row.innerHTML = `
     <td>${task.daysToComplete} дн.</td> <!-- НОВЫЙ СТОЛБЕЦ -->
     <td>${totalPaid.toFixed(2)} ₽</td>
     <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
+    <td><span class="badge bg-secondary">${getCategoryLabel(task.category)}</span></td>
     <td>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
             <i class="fas fa-trash"></i>
