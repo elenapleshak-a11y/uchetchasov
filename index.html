@@ -78,6 +78,12 @@
             padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
         }
+        .badge {
+    font-size: 0.7em;
+        }
+        .btn-group-sm .btn {
+            padding: 0.25rem 0.4rem;
+        }
 
         /* Для планшетов и десктопов */
         @media (min-width: 768px) {
@@ -108,7 +114,7 @@
                         </select>
                     </div>
                     <div class="card-body">
-                        <div class="row row-cols-2 row-cols-md-4 g-2 text-center">
+                        <div class="row row-cols-2 row-cols-md-4 g-2 text-center mb-3">
                             <div class="col">
                                 <div class="stats-card p-2 p-md-3 rounded">
                                     <h6 class="mb-1">Задач</h6>
@@ -131,6 +137,28 @@
                                 <div class="stats-card p-2 p-md-3 rounded">
                                     <h6 class="mb-1">Получено</h6>
                                     <h4 id="totalPaid" class="mb-0">0 ₽</h4>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- НОВЫЕ ПОЛЯ СТАТИСТИКИ -->
+                        <div class="row row-cols-1 row-cols-md-3 g-2 text-center">
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded" style="border-left-color: #28a745;">
+                                    <h6 class="mb-1">Фактический доход</h6>
+                                    <h5 id="totalIncome" class="mb-0">0 ₽ (0)</h5>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded" style="border-left-color: #ffc107;">
+                                    <h6 class="mb-1">Дебиторская задолженность</h6>
+                                    <h5 id="totalDebtor" class="mb-0">0 ₽ (0)</h5>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stats-card p-2 p-md-3 rounded" style="border-left-color: #dc3545;">
+                                    <h6 class="mb-1">Кредиторская задолженность</h6>
+                                    <h5 id="totalCreditor" class="mb-0">0 ₽ (0)</h5>
                                 </div>
                             </div>
                         </div>
@@ -161,6 +189,15 @@
                 </button>
             </div>
         </div>
+
+        <!-- Кнопка выгрузки CSV -->
+<div class="row mb-3">
+    <div class="col-12">
+        <button class="btn btn-outline-success w-100" onclick="exportToCSV()">
+            <i class="fas fa-download me-2"></i>Выгрузить в CSV
+        </button>
+    </div>
+</div>
 
         <!-- Таблица задач -->
         <div class="row">
@@ -229,16 +266,28 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            
-                      <label class="form-label">Категория *</label>
-                      <select class="form-select" id="taskCategory">
-                        <option value="">Выберите категорию</option>
-                        <option value="debit">Дебиторская задолженность</option>
-                        <option value="credit">Кредиторская задолженность</option>
-                        <option value="income">Фактический доход</option>
-                      </select>
+                        <label class="form-label">Тип задачи *</label>
+                        <div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="taskType" id="typeIncome" value="income" checked>
+                                <label class="form-check-label" for="typeIncome">
+                                    Фактический доход
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="taskType" id="typeDebtor" value="debtor">
+                                <label class="form-check-label" for="typeDebtor">
+                                    Дебиторская задолженность
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="taskType" id="typeCreditor" value="creditor">
+                                <label class="form-check-label" for="typeCreditor">
+                                    Кредиторская задолженность
+                                </label>
+                            </div>
+                        </div>
                     </div>
-
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -353,36 +402,52 @@
         }
 
         // Добавление задачи
-        function addTask() {
-            const taskName = document.getElementById('taskName').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const hours = parseFloat(document.getElementById('hours').value);
-            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+       function addTask() {
+    const taskName = document.getElementById('taskName').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const taskType = document.querySelector('input[name="taskType"]:checked').value;
 
-            const category = document.getElementById('taskCategory').value;
-            if (!category) {
-              alert('Выберите категорию задачи');
-              return;
-                }
+    if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
 
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-            if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
-                alert('Пожалуйста, заполните все обязательные поля');
-                return;
-                }
+    if (end < start) {
+        alert('Дата выполнения не может быть раньше даты начала!');
+        return;
+    }
 
-            const task = {
-                id: Date.now(),
-                name: taskName,
-                startDate: startDate,
-                endDate: endDate,
-                hours: hours,
-                hourlyRate: hourlyRate,
-                cost: hours * hourlyRate,
-                paidAmount: 0
-                category: category
-                };
+    const daysToComplete = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+
+    const task = {
+        id: Date.now(),
+        name: taskName,
+        startDate: startDate,
+        endDate: endDate,
+        daysToComplete: daysToComplete,
+        hours: hours,
+        hourlyRate: hourlyRate,
+        cost: hours * hourlyRate,
+        taskType: taskType, // НОВОЕ ПОЛЕ
+        paidAmount: 0
+    };
+
+    tasks.push(task);
+    saveData();
+    updateStats();
+    renderTasksTable();
+    populateMonthFilter();
+    updatePaymentTaskDropdown();
+    
+    bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+    document.getElementById('taskForm').reset();
+}
 
             tasks.push(task);
             saveData();
@@ -472,21 +537,46 @@
 
         // Обновление статистики
         function updateStats() {
-            const selectedMonth = document.getElementById('monthFilter').value;
-            let filteredTasks = tasks;
-            let filteredPayments = payments;
+    const selectedMonth = document.getElementById('monthFilter').value;
+    let filteredTasks = tasks;
+    let filteredPayments = payments;
 
-            if (selectedMonth !== 'all') {
-                filteredTasks = tasks.filter(task => {
-                    const taskMonth = task.endDate.substring(0, 7); // YYYY-MM
-                    return taskMonth === selectedMonth;
-                });
+    if (selectedMonth !== 'all') {
+        filteredTasks = tasks.filter(task => {
+            const taskMonth = task.endDate.substring(0, 7);
+            return taskMonth === selectedMonth;
+        });
 
-                filteredPayments = payments.filter(payment => {
-                    const paymentMonth = payment.date.substring(0, 7);
-                    return paymentMonth === selectedMonth;
-                });
-            }
+        filteredPayments = payments.filter(payment => {
+            const paymentMonth = payment.date.substring(0, 7);
+            return paymentMonth === selectedMonth;
+        });
+    }
+
+    const totalTasks = filteredTasks.length;
+    const totalHours = filteredTasks.reduce((sum, task) => sum + task.hours, 0);
+    const totalAmount = filteredTasks.reduce((sum, task) => sum + task.cost, 0);
+    const totalPaid = filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
+
+    // НОВАЯ СТАТИСТИКА ПО ТИПАМ
+    const incomeTasks = filteredTasks.filter(task => task.taskType === 'income');
+    const debtorTasks = filteredTasks.filter(task => task.taskType === 'debtor');
+    const creditorTasks = filteredTasks.filter(task => task.taskType === 'creditor');
+    
+    const totalIncome = incomeTasks.reduce((sum, task) => sum + task.cost, 0);
+    const totalDebtor = debtorTasks.reduce((sum, task) => sum + task.cost, 0);
+    const totalCreditor = creditorTasks.reduce((sum, task) => sum + task.cost, 0);
+
+    document.getElementById('totalTasks').textContent = totalTasks;
+    document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+    document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' ₽';
+    document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
+    
+    // ОБНОВЛЯЕМ НОВЫЕ ПОЛЯ
+    document.getElementById('totalIncome').textContent = `${totalIncome.toFixed(2)} ₽ (${incomeTasks.length})`;
+    document.getElementById('totalDebtor').textContent = `${totalDebtor.toFixed(2)} ₽ (${debtorTasks.length})`;
+    document.getElementById('totalCreditor').textContent = `${totalCreditor.toFixed(2)} ₽ (${creditorTasks.length})`;
+}
 
             const totalTasks = filteredTasks.length;
             const totalHours = filteredTasks.reduce((sum, task) => sum + task.hours, 0);
@@ -533,20 +623,30 @@
                     const taskPayments = payments.filter(p => p.taskId === task.id);
                     const totalPaid = taskPayments.reduce((sum, p) => sum + p.amount, 0);
                     const status = totalPaid >= task.cost ? 'Оплачено' : 'Не оплачено';
+                    const typeBadge = getTypeBadge(task.taskType);
 
                     const row = document.createElement('tr');
                     row.className = 'task-row';
                     row.innerHTML = `
-                        <td>${task.name}</td>
+                        <td>
+                            <div>${task.name}</div>
+                            <small class="text-muted">${getTypeName(task.taskType)}</small>
+                        </td>
                         <td>${task.hours}</td>
                         <td>${task.hourlyRate} ₽</td>
                         <td>${task.cost.toFixed(2)} ₽</td>
+                        <td>${task.daysToComplete} дн.</td>
                         <td>${totalPaid.toFixed(2)} ₽</td>
                         <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="editTask(${task.id})" title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     `;
                     table.appendChild(row);
@@ -626,6 +726,95 @@
         function getMonthName(monthString) {
             const date = new Date(monthString + '-01');
             return date.toLocaleString('ru-RU', { month: 'long' });
+        }
+
+        // Функции для работы с типами задач
+function getTypeName(type) {
+    const types = {
+        'income': 'Фактический доход',
+        'debtor': 'Дебиторская задолженность',
+        'creditor': 'Кредиторская задолженность'
+    };
+    return types[type] || 'Неизвестно';
+}
+
+function getTypeBadge(type) {
+    const badges = {
+        'income': '<span class="badge bg-success">Доход</span>',
+        'debtor': '<span class="badge bg-warning text-dark">Дебиторская</span>',
+        'creditor': '<span class="badge bg-danger">Кредиторская</span>'
+    };
+    return badges[type] || '';
+}
+
+// Функция редактирования задачи
+function editTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Заполняем форму данными задачи
+    document.getElementById('taskName').value = task.name;
+    document.getElementById('startDate').value = task.startDate;
+    document.getElementById('endDate').value = task.endDate;
+    document.getElementById('hours').value = task.hours;
+    document.getElementById('hourlyRate').value = task.hourlyRate;
+    
+    // Устанавливаем тип задачи
+    document.querySelector(`input[name="taskType"][value="${task.taskType}"]`).checked = true;
+
+    // Удаляем старую задачу
+    tasks = tasks.filter(t => t.id !== taskId);
+    
+    // Сохраняем ID для обновления
+    window.editingTaskId = taskId;
+    
+    // Открываем модальное окно
+    const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+    modal.show();
+}
+
+        // Функция выгрузки в CSV
+        function exportToCSV() {
+            if (tasks.length === 0) {
+                alert('Нет данных для выгрузки');
+                return;
+            }
+        
+            const headers = ['Название', 'Тип', 'Дата начала', 'Дата выполнения', 'Дней', 'Часы', 'Ставка', 'Стоимость', 'Оплачено', 'Статус'];
+            
+            let csvContent = headers.join(';') + '\n';
+            
+            tasks.forEach(task => {
+                const taskPayments = payments.filter(p => p.taskId === task.id);
+                const totalPaid = taskPayments.reduce((sum, p) => sum + p.amount, 0);
+                const status = totalPaid >= task.cost ? 'Оплачено' : 'Не оплачено';
+                
+                const row = [
+                    `"${task.name}"`,
+                    getTypeName(task.taskType),
+                    task.startDate,
+                    task.endDate,
+                    task.daysToComplete,
+                    task.hours,
+                    task.hourlyRate,
+                    task.cost.toFixed(2),
+                    totalPaid.toFixed(2),
+                    status
+                ];
+                
+                csvContent += row.join(';') + '\n';
+            });
+        
+            // Создаем и скачиваем файл
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `учет_задач_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // Сохранение данных в localStorage
