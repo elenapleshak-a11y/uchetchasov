@@ -183,7 +183,6 @@
             <th>Оплачено</th>
             <th>Статус</th>
             <th>Действия</th>
-            <th>Тип дохода</th>
         </tr>
     </thead>
     <tbody id="tasksTable">
@@ -231,16 +230,6 @@
                                 <input type="number" class="form-control" id="hourlyRate" min="0" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                              <label class="form-label">Тип дохода *</label>
-                              <select class="form-select" id="taskCategory" required>
-                                <option value="">Выберите тип</option>
-                                <option value="debit">Дебиторская задолженность</option>
-                                <option value="credit">Кредиторская задолженность</option>
-                                <option value="income">Фактический доход</option>
-                              </select>
-                        </div>
-
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -354,9 +343,53 @@
             });
         }
 
-        
+        // Добавление задачи
+        function addTask() {
+    const taskName = document.getElementById('taskName').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
 
-  
+    if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate)) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
+
+    // РАСЧЕТ ДНЕЙ ВЫПОЛНЕНИЯ
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // ВАЛИДАЦИЯ ДАТ
+    if (end < start) {
+        alert('Дата выполнения не может быть раньше даты начала!');
+        return;
+    }
+
+    const daysToComplete = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    const task = {
+        id: Date.now(),
+        name: taskName,
+        startDate: startDate,
+        endDate: endDate,
+        daysToComplete: daysToComplete,
+        hours: hours,
+        hourlyRate: hourlyRate,
+        cost: hours * hourlyRate,
+        paidAmount: 0
+    };
+
+    tasks.push(task);
+    saveData();
+    updateStats();
+    renderTasksTable();
+    populateMonthFilter();
+    updatePaymentTaskDropdown();
+    
+    bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+    document.getElementById('taskForm').reset();
+}
 
         // Добавление оплаты
         function addPayment() {
@@ -461,16 +494,6 @@
             document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
         }
 
-        //Отображение типа оплат
-        function getCategoryLabel(code) {
-    switch (code) {
-        case 'debit': return 'Дебиторская';
-        case 'credit': return 'Кредиторская';
-        case 'income': return 'Фактический доход';
-        default: return '—';
-    }
-}
-
         // Отображение таблицы задач
         function renderTasksTable() {
             const table = document.getElementById('tasksTable');
@@ -516,7 +539,6 @@ row.innerHTML = `
     <td>${task.daysToComplete} дн.</td> <!-- НОВЫЙ СТОЛБЕЦ -->
     <td>${totalPaid.toFixed(2)} ₽</td>
     <td class="${status === 'Оплачено' ? 'paid' : 'unpaid'}">${status}</td>
-    <td><span class="badge bg-secondary">${getCategoryLabel(task.category)}</span></td>
     <td>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Удалить задачу">
             <i class="fas fa-trash"></i>
@@ -624,63 +646,6 @@ if (taskPayments.length > 0) {
         document.getElementById('debug-status').textContent = '❌ Wrong URL';
         document.getElementById('debug-status').style.color = 'red';
     }
-    // Добавление задачи
-        function addTask() {
-    const taskName = document.getElementById('taskName').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const hours = parseFloat(document.getElementById('hours').value);
-    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
-    const category = document.getElementById('taskCategory').value;
-
-    if (!taskName || !startDate || !endDate || isNaN(hours) || isNaN(hourlyRate) || !category) {
-        alert('Пожалуйста, заполните все обязательные поля');
-        return;
-    }
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (end < start) {
-        alert('Дата выполнения не может быть раньше даты начала!');
-        return;
-    }
-
-    const daysToComplete = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-
-    const task = {
-        id: Date.now(),
-        name: taskName,
-        startDate: startDate,
-        endDate: endDate,
-        daysToComplete: daysToComplete,
-        hours: hours,
-        hourlyRate: hourlyRate,
-        cost: hours * hourlyRate,
-        paidAmount: 0,
-        category: category
-    };
-
-    const editingId = document.getElementById('taskForm').dataset.editingId;
-    if (editingId) {
-        const index = tasks.findIndex(t => t.id == editingId);
-        if (index !== -1) {
-            tasks[index] = task;
-        }
-        delete document.getElementById('taskForm').dataset.editingId;
-    } else {
-        tasks.push(task);
-    }
-
-    saveData();
-    updateStats();
-    renderTasksTable();
-    populateMonthFilter();
-    updatePaymentTaskDropdown();
-
-    bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-    document.getElementById('taskForm').reset();
-}
 </script>
 </body>
 </html>
