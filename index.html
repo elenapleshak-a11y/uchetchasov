@@ -566,16 +566,8 @@ function addTask() {
     document.getElementById('totalCreditor').textContent = `${totalCreditor.toFixed(2)} ₽ (${creditorTasks.length})`;
 }
 
-            const totalTasks = filteredTasks.length;
-            const totalHours = filteredTasks.reduce((sum, task) => sum + task.hours, 0);
-            const totalAmount = filteredTasks.reduce((sum, task) => sum + task.cost, 0);
-            const totalPaid = filteredPayments.reduce((sum, payment) => sum + payment.amount, 0);
-
-            document.getElementById('totalTasks').textContent = totalTasks;
-            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
-            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' ₽';
-            document.getElementById('totalPaid').textContent = totalPaid.toFixed(2) + ' ₽';
-        }
+           
+        
 
         // Отображение таблицы задач
         function renderTasksTable() {
