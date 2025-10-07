@@ -401,8 +401,8 @@
             });
         }
 
-        // Добавление задачи
-       function addTask() {
+       // Добавление задачи
+function addTask() {
     const taskName = document.getElementById('taskName').value;
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
@@ -434,7 +434,7 @@
         hours: hours,
         hourlyRate: hourlyRate,
         cost: hours * hourlyRate,
-        taskType: taskType, // НОВОЕ ПОЛЕ
+        taskType: taskType,
         paidAmount: 0
     };
 
@@ -445,22 +445,10 @@
     populateMonthFilter();
     updatePaymentTaskDropdown();
     
+    // Закрытие модального окна и сброс формы
     bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
     document.getElementById('taskForm').reset();
 }
-
-            tasks.push(task);
-            saveData();
-            updateStats();
-            renderTasksTable();
-            populateMonthFilter();
-            updatePaymentTaskDropdown();
-            
-            // Закрытие модального окна и сброс формы
-            bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-            document.getElementById('taskForm').reset();
-        }
-
         // Добавление оплаты
         function addPayment() {
             const taskId = parseInt(document.getElementById('paymentTask').value);
